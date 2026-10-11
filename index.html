@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4ef">
+  <title>Raíz — retiros holísticos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Raíz, inicio"><span class="brand-mark">r.</span><span>raíz<span class="brand-sub">RETIROS CONSCIENTES</span></span></a>
+    <nav aria-label="Navegación principal">
+      <button class="nav-link active" data-view="inicio">Inicio</button>
+      <button class="nav-link" data-view="registrar">Registrar retiro</button>
+      <button class="nav-link" data-view="consultar">Mis retiros</button>
+      <button class="nav-link" data-view="inscribirse">Explorar retiros</button>
+    </nav>
+    <button class="profile" aria-label="Perfil de Martina López"><span class="avatar">ML</span><span class="profile-name">Martina López</span><span class="chevron">⌄</span></button>
+  </header>
+
+  <main>
+    <section id="inicio" class="view active-view">
+      <div class="hero">
+        <div class="hero-copy"><span class="eyebrow"><i></i> UN ESPACIO PARA VOLVER A VOS</span><h1>Tu próximo paso<br>empieza <em>acá.</em></h1><p>Encontrá experiencias que nutren, conectan y transforman. O creá un espacio para que otros también puedan vivirlas.</p><div class="hero-actions"><button class="button primary" data-go="inscribirse">Explorar retiros <span>↗</span></button><button class="text-button" data-go="registrar">Organizar un retiro <span>→</span></button></div></div>
+        <div class="hero-art" aria-label="Ilustración de montañas al amanecer"><div class="sun"></div><div class="mountain m-back"></div><div class="mountain m-front"></div><div class="art-caption">UN MOMENTO<br>PARA VOS <span>✳</span></div><div class="art-number">01 / 03</div></div>
+      </div>
+      <div class="intro-row"><div><span class="eyebrow">LA EXPERIENCIA</span><h2>Elegí cómo querés <em>conectar.</em></h2></div><p>Un retiro es una pausa con intención. Explorá propuestas o compartí la tuya con nuestra comunidad.</p></div>
+      <div class="action-cards">
+        <article class="action-card card-green"><div class="card-icon">✳</div><span class="card-kicker">PARA ORGANIZADORES</span><h3>Creá una experiencia<br>que deje huella.</h3><p>Publicá tu retiro y conectá con personas que buscan lo mismo que vos.</p><button data-go="registrar" class="card-link">Registrar un retiro <span>↗</span></button><span class="card-decoration">✳</span></article>
+        <article class="action-card card-peach"><div class="card-icon">⌕</div><span class="card-kicker">PARA EXPLORAR</span><h3>Hay un lugar<br>esperándote.</h3><p>Descubrí propuestas pensadas para cuidar tu cuerpo, mente y espíritu.</p><button data-go="inscribirse" class="card-link">Ver retiros disponibles <span>↗</span></button><span class="card-decoration">◌</span></article>
+        <article class="action-card card-lilac"><div class="card-icon">☼</div><span class="card-kicker">TU AGENDA PERSONAL</span><h3>Todo lo que elegís,<br>en un solo lugar.</h3><p>Consultá tus retiros, detalles y el estado de cada inscripción.</p><button data-go="consultar" class="card-link">Ir a mis retiros <span>↗</span></button><span class="card-decoration">☼</span></article>
+      </div>
+      <div class="demo-note"><span>ⓘ</span> Prototipo demostrativo · Los datos se guardan únicamente en este navegador.</div>
+    </section>
+
+    <section id="registrar" class="view">
+      <div class="page-heading"><div><span class="eyebrow">PARA ORGANIZADORES</span><h1>Registrar un <em>retiro.</em></h1><p>Completá los detalles para compartir tu propuesta con la comunidad.</p></div><div class="step-count"><span id="step-label">PASO 1 DE 3</span><div class="step-track"><i id="step-progress"></i></div></div></div>
+      <div class="form-layout"><form id="retreat-form" class="panel form-panel" novalidate>
+        <div class="form-step active" data-step="1"><div class="panel-heading"><span class="step-circle">01</span><div><h2>Lo esencial</h2><p>Contanos de qué se trata tu retiro.</p></div></div><div class="logged-user"><span class="avatar">ML</span><div><small>REGISTRADO POR</small><strong>Martina López</strong><span>martina.lopez@email.com · +54 9 11 4567-8901</span></div><span class="logged-date" id="current-date"></span></div>
+          <div class="field-grid"><label class="field full">Nombre del retiro <span>*</span><input name="name" required placeholder="Ej. Volver a lo esencial" maxlength="70"></label><label class="field">Costo total (ARS) <span>*</span><div class="input-prefix"><span>$</span><input name="price" type="number" min="0" required placeholder="180000"></div></label><label class="field">Ubicación <span>*</span><input name="location" required placeholder="Lugar, provincia"></label><label class="field">Fecha de inicio <span>*</span><input name="start" type="date" required></label><label class="field">Fecha de fin <span>*</span><input name="end" type="date" required></label><label class="field full">Descripción <span>*</span><textarea name="description" required rows="3" placeholder="¿Qué hace especial a esta experiencia?"></textarea></label></div>
+          <label class="toggle-row"><span><strong>¿Es cancelable?</strong><small>Los participantes podrán cancelar su inscripción.</small></span><input name="cancelable" type="checkbox"><i class="switch"></i></label>
+        </div>
+        <div class="form-step" data-step="2"><div class="panel-heading"><span class="step-circle">02</span><div><h2>La experiencia</h2><p>Elegí una temática y las actividades del retiro.</p></div></div><label class="field">Temática <span>*</span><select name="theme" required><option value="">Seleccioná una temática</option><option value="Yoga y movimiento">Yoga y movimiento — Prácticas para habitar el cuerpo.</option><option value="Meditación">Meditación — Calma mental y presencia.</option><option value="Naturaleza">Naturaleza — Reconectar con el entorno natural.</option><option value="Bienestar integral">Bienestar integral — Hábitos para una vida equilibrada.</option><option value="Creatividad">Creatividad — Expresión y exploración personal.</option></select></label><div class="field org-field"><span class="field-title">Contacto del organizador <span>*</span></span><div class="field-grid"><label class="field">Nombre<input name="organizer" required placeholder="Nombre y apellido"></label><label class="field">Correo electrónico<input name="organizerEmail" required type="email" placeholder="hola@turetiro.com"></label><label class="field full">Teléfono<input name="organizerPhone" required placeholder="+54 9 11 0000-0000"></label></div></div><div class="field"><span class="field-title">Actividades <span>*</span> <small>Seleccioná al menos una.</small></span><div class="check-grid"><label class="check-option"><input type="checkbox" name="activities" value="Yoga al amanecer"><span>☼</span>Yoga al amanecer</label><label class="check-option"><input type="checkbox" name="activities" value="Meditación guiada"><span>◌</span>Meditación guiada</label><label class="check-option"><input type="checkbox" name="activities" value="Caminata consciente"><span>⌁</span>Caminata consciente</label><label class="check-option"><input type="checkbox" name="activities" value="Taller de respiración"><span>〰</span>Taller de respiración</label><label class="check-option"><input type="checkbox" name="activities" value="Alimentación consciente"><span>❋</span>Alimentación consciente</label><label class="check-option"><input type="checkbox" name="activities" value="Círculo de palabra"><span>◉</span>Círculo de palabra</label></div></div></div>
+        <div class="form-step" data-step="3"><div class="panel-heading"><span class="step-circle">03</span><div><h2>Un último detalle</h2><p>¿Vas a asistir con acompañantes?</p></div></div><div class="choice-row"><label class="choice"><input type="radio" name="hasGuests" value="no" checked><span>Sin acompañantes</span></label><label class="choice"><input type="radio" name="hasGuests" value="yes"><span>Con acompañantes</span></label></div><div id="guest-entry" class="guest-entry hidden"><div class="field-grid"><label class="field">Nombre<input id="guest-name" placeholder="Nombre y apellido"></label><label class="field">Vínculo<input id="guest-relation" placeholder="Ej. Amiga, pareja"></label></div><button id="add-guest" type="button" class="small-button">＋ Agregar acompañante</button><div id="guest-list" class="guest-list"></div></div><div class="summary-box" id="retreat-summary"></div></div>
+        <div class="form-error hidden" id="form-error" role="alert"></div><div class="form-footer"><button type="button" class="button quiet" id="back-step">← Volver</button><button type="button" class="button primary" id="next-step">Continuar <span>→</span></button><button type="submit" class="button primary hidden" id="submit-retreat">Confirmar registro <span>✓</span></button></div>
+      </form><aside class="side-tip"><span class="tip-spark">✳</span><span class="eyebrow">UN BUEN COMIENZO</span><h3>Los detalles hacen la diferencia.</h3><p>Una descripción clara y actividades bien elegidas ayudan a que cada persona encuentre su lugar.</p><div class="tip-bottom">✦ <span>Compartí tu forma de ver el bienestar.</span></div></aside></div>
+    </section>
+
+    <section id="consultar" class="view"><div class="page-heading"><div><span class="eyebrow">TU AGENDA PERSONAL</span><h1>Mis <em>retiros.</em></h1><p>Acá encontrás los retiros que organizaste y aquellos a los que te inscribiste.</p></div><button class="button primary" data-go="registrar">＋ Nuevo retiro</button></div><div id="my-retreats" class="retreat-list"></div></section>
+
+    <section id="inscribirse" class="view"><div class="page-heading explore-heading"><div><span class="eyebrow">ENCONTRÁ TU PRÓXIMA PAUSA</span><h1>Retiros para <em>conectar.</em></h1><p>Experiencias seleccionadas para acompañarte en tu camino.</p></div><span class="available-count" id="available-count"></span></div><div id="available-retreats" class="retreat-grid"></div></section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="detail-dialog" class="detail-dialog"><button class="dialog-close" aria-label="Cerrar">×</button><div id="dialog-content"></div></dialog>
+  <dialog id="enroll-dialog" class="detail-dialog"><button class="dialog-close" aria-label="Cerrar">×</button><div id="enroll-content"></div></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
