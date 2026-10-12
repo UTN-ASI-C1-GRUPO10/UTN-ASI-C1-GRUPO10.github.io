@@ -2,15 +2,15 @@
 
 Prototipo demostrativo del trabajo práctico integral de Análisis de Sistemas, realizado por el grupo 10 de la comisión 1.
 
-## Prototipo de retiros holísticos
+## Prototipo de agenda personal de retiros
 
-La página estática simula tres casos de uso:
+La página estática simula estos casos de uso:
 
-- **Registrar retiro:** formulario en tres pasos para completar los datos, temática, organizador, actividades y acompañantes. Valida los campos obligatorios y las fechas antes de registrar el retiro.
-- **Consultar retiro:** agenda con retiros registrados e inscripciones, con una vista de detalle que incluye organizador, actividades, acompañantes, pago, participación y elementos para llevar.
-- **Inscribirse a un retiro:** catálogo de retiros disponibles, resumen de inscripción y confirmación con acompañantes opcionales.
+- **Registrar retiro:** agrega a la agenda un retiro con sus datos, temática, contacto del organizador, actividades y acompañantes. Valida campos obligatorios y fechas.
+- **Consultar retiro:** muestra la agenda y el detalle del retiro, con pagos, estado de participación y elementos necesarios cuando estén registrados.
+- **Modificar retiro:** permite editar los datos de un retiro, revisar un resumen, confirmar los cambios o cancelar y descartarlos.
 
-Los datos de ejemplo y las operaciones se guardan en el `localStorage` del navegador. No hay backend ni se realizan pagos reales. Para volver al estado inicial, borrá los datos del sitio desde las herramientas del navegador.
+La agenda comienza con retiros de ejemplo. Los cambios viven solo en memoria y se pierden al refrescar la página. No hay base de datos ni pagos reales.
 
 ## Publicación
 
