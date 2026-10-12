@@ -11,8 +11,18 @@ let currentStep = 1;
 let toastTimer;
 
 function escapeHtml(value = '') { return String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char])); }
-function dateLabel(value, options = { day: 'numeric', month: 'short', year: 'numeric' }) { if (!value) return '—'; return new Intl.DateTimeFormat('es-AR', options).format(new Date(`${value}T12:00:00`)); }
-function money(value) { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(value) || 0); }
+function isoDate(value) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{2})$/.exec(String(value || '').trim());
+  if (!match) return '';
+  const [, dayText, monthText, yearText] = match;
+  const day = Number(dayText), month = Number(monthText), year = 2000 + Number(yearText);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return '';
+  return `${year}-${monthText}-${dayText}`;
+}
+function dateField(value) { if (!value) return ''; const [year, month, day] = value.split('-'); return `${day}/${month}/${year.slice(-2)}`; }
+function dateLabel(value) { if (!value) return '—'; const iso = String(value).includes('/') ? isoDate(value) : value; return iso ? dateField(iso) : '—'; }
+function money(value) { if (value === null || value === '' || value === undefined) return 'Sin costo registrado'; return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(value) || 0); }
 function showToast(message) { const toast = document.querySelector('#toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 3000); }
 function go(view) {
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('active-view', el.id === view));
@@ -44,10 +54,15 @@ function validateStep(step) {
   const section = document.querySelector(`.form-step[data-step="${step}"]`);
   const missing = [...section.querySelectorAll('[required]')].find(field => !field.value.trim());
   if (missing) { missing.focus(); return 'Completá todos los campos obligatorios para continuar.'; }
-  const invalid = [...section.querySelectorAll('[required]')].find(field => !field.checkValidity());
-  if (invalid) { invalid.focus(); return 'Revisá el formato de los datos ingresados.'; }
-  if (step === 1 && form.elements.end.value <= form.elements.start.value) { form.elements.end.focus(); return 'La fecha de fin debe ser posterior a la fecha de inicio.'; }
-  if (step === 2 && activities.length === 0) return 'Agregá al menos una actividad al retiro.';
+  const invalid = [...section.querySelectorAll('input, textarea')].find(field => field.value.trim() && !field.checkValidity());
+  if (invalid) { invalid.focus(); return ['start', 'end'].includes(invalid.name) ? 'Ingresá las fechas con el formato dd/mm/yy. Por ejemplo: 25/11/26.' : 'Revisá el formato de los datos ingresados.'; }
+  if (step === 1) {
+    const start = isoDate(form.elements.start.value); const end = isoDate(form.elements.end.value);
+    if (!start || !end) return 'Ingresá las fechas con el formato dd/mm/yy. Por ejemplo: 25/11/26.';
+    if (end <= start) { form.elements.end.focus(); return 'La fecha de fin debe ser posterior a la fecha de inicio.'; }
+    const price = form.elements.price.value.trim();
+    if (price && (!Number.isFinite(Number(price)) || Number(price) < 0)) return 'El costo debe ser igual o mayor a cero.';
+  }
   return '';
 }
 document.querySelector('#next-step').addEventListener('click', () => { const error = validateStep(currentStep); if (error) return showError(error); setStep(currentStep + 1); });
@@ -75,9 +90,9 @@ form.addEventListener('submit', event => {
   event.preventDefault();
   let error = validateStep(1); if (error) { setStep(1); showError(error); return; }
   error = validateStep(2); if (error) { setStep(2); showError(error); return; }
-  if (form.elements.hasGuests.value === 'yes' && guests.length === 0) { showError('Agregá al menos un acompañante o elegí continuar sin acompañantes.'); return; }
   const data = new FormData(form);
-  retreats.unshift({ id: `retreat-${Date.now()}`, name: data.get('name').trim(), theme: data.get('theme').trim(), organizer: data.get('organizer').trim(), organizerEmail: data.get('organizerEmail').trim(), organizerPhone: data.get('organizerPhone').trim(), start: data.get('start'), end: data.get('end'), location: data.get('location').trim(), description: data.get('description').trim(), price: Number(data.get('price')), activities: [...activities], guests: form.elements.hasGuests.value === 'yes' ? [...guests] : [], payments: [], participation: 'A confirmar', items: [] });
+  const optional = key => String(data.get(key) || '').trim();
+  retreats.unshift({ id: `retreat-${Date.now()}`, name: optional('name'), theme: optional('theme'), organizer: optional('organizer'), organizerEmail: optional('organizerEmail'), organizerPhone: optional('organizerPhone'), start: isoDate(optional('start')), end: isoDate(optional('end')), location: optional('location'), description: optional('description'), price: optional('price') ? Number(optional('price')) : null, activities: [...activities], guests: form.elements.hasGuests.value === 'yes' ? [...guests] : [], payments: [], participation: '', items: [] });
   form.reset(); guests = []; activities = []; renderGuestList(); renderActivityList(); document.querySelector('#guest-entry').classList.add('hidden'); setStep(1); showToast('Retiro agregado a tu agenda.'); go('consultar');
 });
 
@@ -109,34 +124,47 @@ document.body.addEventListener('click', event => {
 });
 
 function splitLines(value) { return value.split(/[\n,]/).map(part => part.trim()).filter(Boolean); }
+function optionalEditPriceInvalid(editForm) { const price = String(editForm.elements.price.value || '').trim(); return Boolean(price && (!Number.isFinite(Number(price)) || Number(price) < 0)); }
 function openEdit(id) {
   const item = retreats.find(entry => entry.id === id); if (!item) return;
   const content = document.querySelector('#edit-content');
   content.innerHTML = `<span class="dialog-kicker">MODIFICAR · AGENDA PERSONAL</span><h2>Actualizar retiro.</h2><p class="dialog-desc">Editá la información y revisá los cambios antes de confirmarlos.</p><form id="edit-form" class="edit-form" novalidate><div class="field-grid"><label class="field full">Nombre del retiro <span>*</span><input name="name" required value="${escapeHtml(item.name)}"></label><label class="field">Costo total (ARS) <span>*</span><input name="price" type="number" min="0" required value="${Number(item.price)}"></label><label class="field">Temática <span>*</span><input name="theme" required value="${escapeHtml(item.theme)}"></label><label class="field">Fecha de inicio <span>*</span><input name="start" type="date" required value="${item.start}"></label><label class="field">Fecha de fin <span>*</span><input name="end" type="date" required value="${item.end}"></label><label class="field full">Ubicación <span>*</span><input name="location" required value="${escapeHtml(item.location)}"></label><label class="field full">Descripción <span>*</span><textarea name="description" required rows="3">${escapeHtml(item.description)}</textarea></label><label class="field">Organizador <span>*</span><input name="organizer" required value="${escapeHtml(item.organizer)}"></label><label class="field">Correo del organizador <span>*</span><input name="organizerEmail" type="email" required value="${escapeHtml(item.organizerEmail)}"></label><label class="field full">Teléfono del organizador <span>*</span><input name="organizerPhone" required value="${escapeHtml(item.organizerPhone)}"></label><label class="field full">Actividades <span>*</span><small class="edit-hint">Una por línea o separadas por coma.</small><textarea name="activities" required rows="3">${escapeHtml(item.activities.join('\n'))}</textarea></label><label class="field full">Acompañantes<small class="edit-hint">Uno por línea como Nombre | Vínculo.</small><textarea name="guests" rows="2">${escapeHtml(item.guests.map(g => `${g.name} | ${g.relation}`).join('\n'))}</textarea></label><label class="field full">Estado de participación<input name="participation" value="${escapeHtml(item.participation || '')}" placeholder="Ej. Confirmada"></label><label class="field full">Elementos necesarios<small class="edit-hint">Separados por coma o por línea.</small><textarea name="items" rows="2">${escapeHtml(item.items.join('\n'))}</textarea></label></div><div id="edit-error" class="form-error hidden" role="alert"></div><div id="edit-summary" class="summary-box hidden"></div><div class="edit-actions"><button type="button" class="button quiet" id="cancel-edit">Cancelar</button><button type="button" class="button primary" id="preview-edit">Ver resumen</button><button type="button" class="button primary hidden" id="save-edit">Confirmar cambios <span>✓</span></button></div></form>`;
+  const editForm = document.querySelector('#edit-form');
+  editForm.elements.price.value = item.price ?? '';
+  editForm.querySelectorAll('[required]').forEach(field => field.removeAttribute('required'));
+  ['name', 'location', 'start', 'end'].forEach(name => { editForm.elements[name].required = true; });
+  editForm.querySelectorAll('.field > span, .field-title > span').forEach(star => { if (!star.parentElement.querySelector('[required]')) star.remove(); });
+  ['start', 'end'].forEach(name => { const field = editForm.elements[name]; field.type = 'text'; field.inputMode = 'numeric'; field.pattern = '[0-9]{2}/[0-9]{2}/[0-9]{2}'; field.placeholder = 'dd/mm/yy'; field.value = dateField(item[name]); });
   document.querySelector('#edit-dialog').showModal();
   document.querySelector('#cancel-edit').addEventListener('click', () => document.querySelector('#edit-dialog').close());
-  document.querySelector('#preview-edit').addEventListener('click', () => previewEdit(item.id));
+  document.querySelector('#preview-edit').addEventListener('click', () => {
+    const button = document.querySelector('#preview-edit'); const editForm = document.querySelector('#edit-form'); const summary = document.querySelector('#edit-summary');
+    if (button.dataset.preview === 'true') { editForm.querySelectorAll('input, textarea').forEach(field => { field.readOnly = false; }); summary.classList.add('hidden'); document.querySelector('#save-edit').classList.add('hidden'); button.dataset.preview = 'false'; button.textContent = 'Ver resumen'; return; }
+    previewEdit(item.id);
+  });
   document.querySelector('#save-edit').addEventListener('click', () => saveEdit(item.id));
 }
 function editValues() {
   const editForm = document.querySelector('#edit-form'); const data = new FormData(editForm);
-  return { name: data.get('name').trim(), price: Number(data.get('price')), theme: data.get('theme').trim(), start: data.get('start'), end: data.get('end'), location: data.get('location').trim(), description: data.get('description').trim(), organizer: data.get('organizer').trim(), organizerEmail: data.get('organizerEmail').trim(), organizerPhone: data.get('organizerPhone').trim(), activities: splitLines(data.get('activities')), guests: String(data.get('guests')).split('\n').map(row => row.trim()).filter(Boolean).map(row => { const [name, ...relation] = row.split('|').map(part => part.trim()); return { name, relation: relation.join(' | ') || 'Acompañante' }; }), participation: data.get('participation').trim(), items: splitLines(data.get('items')) };
+  const optional = key => String(data.get(key) || '').trim();
+  return { name: optional('name'), price: optional('price') ? Number(optional('price')) : null, theme: optional('theme'), start: isoDate(optional('start')), end: isoDate(optional('end')), location: optional('location'), description: optional('description'), organizer: optional('organizer'), organizerEmail: optional('organizerEmail'), organizerPhone: optional('organizerPhone'), activities: splitLines(optional('activities')), guests: optional('guests').split('\n').map(row => row.trim()).filter(Boolean).map(row => { const [name, ...relation] = row.split('|').map(part => part.trim()); return { name, relation: relation.join(' | ') || 'Acompañante' }; }), participation: optional('participation'), items: splitLines(optional('items')) };
 }
 function previewEdit(id) {
   const editForm = document.querySelector('#edit-form'); const error = document.querySelector('#edit-error');
   const missing = [...editForm.querySelectorAll('[required]')].find(field => !field.value.trim());
   if (missing) { error.textContent = 'Completá todos los campos obligatorios.'; error.classList.remove('hidden'); missing.focus(); return; }
-  const invalid = [...editForm.querySelectorAll('[required]')].find(field => !field.checkValidity());
-  if (invalid) { error.textContent = 'Revisá el formato de los datos ingresados.'; error.classList.remove('hidden'); invalid.focus(); return; }
+  const invalid = [...editForm.querySelectorAll('input, textarea')].find(field => field.value.trim() && !field.checkValidity());
+  if (invalid) { error.textContent = ['start', 'end'].includes(invalid.name) ? 'Ingresá las fechas con el formato dd/mm/yy.' : 'Revisá el formato de los datos ingresados.'; error.classList.remove('hidden'); invalid.focus(); return; }
   const values = editValues();
+  if (!values.start || !values.end) { error.textContent = 'Ingresá las fechas con el formato dd/mm/yy.'; error.classList.remove('hidden'); return; }
   if (values.end <= values.start) { error.textContent = 'La fecha de fin debe ser posterior a la fecha de inicio.'; error.classList.remove('hidden'); editForm.elements.end.focus(); return; }
-  if (!Number.isFinite(values.price) || values.price < 0 || !values.activities.length) { error.textContent = 'Revisá el costo y agregá al menos una actividad.'; error.classList.remove('hidden'); return; }
+  if (optionalEditPriceInvalid(editForm)) { error.textContent = 'El costo debe ser igual o mayor a cero.'; error.classList.remove('hidden'); editForm.elements.price.focus(); return; }
   error.classList.add('hidden');
   const summary = document.querySelector('#edit-summary');
   summary.innerHTML = `<h3>Resumen de cambios</h3><div class="summary-line"><span class="summary-label">Retiro</span><strong>${escapeHtml(values.name)}</strong></div><div class="summary-line"><span class="summary-label">Fechas</span><span>${dateLabel(values.start)} – ${dateLabel(values.end)}</span></div><div class="summary-line"><span class="summary-label">Ubicación</span><span>${escapeHtml(values.location)}</span></div><div class="summary-line"><span class="summary-label">Descripción</span><span>${escapeHtml(values.description)}</span></div><div class="summary-line"><span class="summary-label">Temática</span><span>${escapeHtml(values.theme)}</span></div><div class="summary-line"><span class="summary-label">Organizador</span><span>${escapeHtml(values.organizer)} · ${escapeHtml(values.organizerEmail)} · ${escapeHtml(values.organizerPhone)}</span></div><div class="summary-line"><span class="summary-label">Actividades</span><span>${values.activities.map(escapeHtml).join(', ')}</span></div><div class="summary-line"><span class="summary-label">Acompañantes</span><span>${values.guests.map(g => `${escapeHtml(g.name)} (${escapeHtml(g.relation)})`).join(', ') || 'Sin acompañantes'}</span></div><div class="summary-line"><span class="summary-label">Participación</span><span>${escapeHtml(values.participation || 'Sin estado registrado')}</span></div><div class="summary-line"><span class="summary-label">Elementos necesarios</span><span>${values.items.map(escapeHtml).join(', ') || 'Sin elementos registrados'}</span></div><div class="summary-line"><strong>Costo total</strong><strong>${money(values.price)}</strong></div>`;
   summary.classList.remove('hidden'); document.querySelector('#save-edit').classList.remove('hidden'); document.querySelector('#preview-edit').textContent = 'Volver a editar';
   editForm.querySelectorAll('input, textarea').forEach(field => { field.readOnly = true; });
-  document.querySelector('#preview-edit').onclick = () => { editForm.querySelectorAll('input, textarea').forEach(field => { field.readOnly = false; }); summary.classList.add('hidden'); document.querySelector('#save-edit').classList.add('hidden'); document.querySelector('#preview-edit').textContent = 'Ver resumen'; document.querySelector('#preview-edit').onclick = () => previewEdit(id); };
+  const previewButton = document.querySelector('#preview-edit'); previewButton.dataset.preview = 'true'; previewButton.textContent = 'Volver a editar';
 }
 function saveEdit(id) {
   const item = retreats.find(entry => entry.id === id); if (!item) return;

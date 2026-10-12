@@ -6,7 +6,7 @@ Prototipo demostrativo del trabajo práctico integral de Análisis de Sistemas, 
 
 La página estática simula estos casos de uso:
 
-- **Registrar retiro:** agrega a la agenda un retiro con sus datos, temática, contacto del organizador, actividades y acompañantes. Valida campos obligatorios y fechas.
+- **Registrar retiro:** nombre, ubicación y fechas son obligatorios; el resto de los datos se puede completar después. Las fechas se ingresan como `dd/mm/yy`.
 - **Consultar retiro:** muestra la agenda y el detalle del retiro, con pagos, estado de participación y elementos necesarios cuando estén registrados.
 - **Modificar retiro:** permite editar los datos de un retiro, revisar un resumen, confirmar los cambios o cancelar y descartarlos.
 
