@@ -28,7 +28,6 @@ function go(view) {
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('active-view', el.id === view));
   document.querySelectorAll('.nav-link').forEach(el => el.classList.toggle('active', el.dataset.view === view));
   if (view === 'consultar') renderConsultList();
-  if (view === 'modificar') renderEditList();
   if (view === 'registrar') renderRegisteredPreview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -96,19 +95,16 @@ form.addEventListener('submit', event => {
   form.reset(); guests = []; activities = []; renderGuestList(); renderActivityList(); document.querySelector('#guest-entry').classList.add('hidden'); setStep(1); showToast('Retiro agregado a tu agenda.'); go('consultar');
 });
 
-function retreatRow(item, actionLabel, actionAttr) {
-  return `<article class="retreat-row"><div><h3>${escapeHtml(item.name)}</h3><p>${escapeHtml(item.theme)} · ${escapeHtml(item.location)}</p></div><div class="retreat-meta">${dateLabel(item.start)} – ${dateLabel(item.end)}<br>${money(item.price)}</div><div class="row-actions"><button class="small-action" ${actionAttr}="${escapeHtml(item.id)}">${actionLabel}</button></div></article>`;
+function retreatRow(item, allowEdit = false) {
+  return `<article class="retreat-row"><div><h3>${escapeHtml(item.name)}</h3><p>${escapeHtml(item.theme || 'Temática pendiente')} · ${escapeHtml(item.location)}</p></div><div class="retreat-meta">${dateLabel(item.start)} – ${dateLabel(item.end)}<br>${money(item.price)}</div><div class="row-actions"><button class="small-action" data-detail="${escapeHtml(item.id)}">Ver detalle</button>${allowEdit ? `<button class="small-action" data-edit="${escapeHtml(item.id)}">Modificar retiro</button>` : ''}</div></article>`;
 }
 function listEmpty(title, copy, action = '') { return `<div class="empty-state"><div class="empty-icon">✳</div><h3>${title}</h3><p>${copy}</p>${action}</div>`; }
 function renderConsultList() {
-  document.querySelector('#my-retreats').innerHTML = retreats.length ? retreats.map(item => retreatRow(item, 'Ver detalle', 'data-detail')).join('') : listEmpty('Tu agenda está vacía', 'Registrá un retiro para tener su información a mano.', '<button class="button primary" data-go="registrar">Registrar retiro</button>');
+  document.querySelector('#my-retreats').innerHTML = retreats.length ? retreats.map(item => retreatRow(item, true)).join('') : listEmpty('Tu agenda está vacía', 'Registrá un retiro para tener su información a mano.', '<button class="button primary" data-go="registrar">Registrar retiro</button>');
 }
 function renderRegisteredPreview() {
   const container = document.querySelector('#registered-preview'); if (!container) return;
-  container.innerHTML = `<div class="list-heading"><div><span class="eyebrow">AGENDA PERSONAL</span><h2>Retiros en tu agenda</h2></div><span class="list-count">${retreats.length} ${retreats.length === 1 ? 'retiro' : 'retiros'}</span></div>${retreats.length ? `<div class="retreat-list">${retreats.map(item => retreatRow(item, 'Ver detalle', 'data-detail')).join('')}</div>` : listEmpty('Todavía no hay retiros', 'Al registrar uno, aparecerá en esta lista.')}`;
-}
-function renderEditList() {
-  document.querySelector('#edit-retreats').innerHTML = retreats.length ? retreats.map(item => retreatRow(item, 'Modificar', 'data-edit')).join('') : listEmpty('No hay retiros para modificar', 'Primero agregá un retiro a tu agenda.', '<button class="button primary" data-go="registrar">Registrar retiro</button>');
+  container.innerHTML = `<div class="list-heading"><div><span class="eyebrow">AGENDA PERSONAL</span><h2>Retiros en tu agenda</h2></div><span class="list-count">${retreats.length} ${retreats.length === 1 ? 'retiro' : 'retiros'}</span></div>${retreats.length ? `<div class="retreat-list">${retreats.map(item => retreatRow(item)).join('')}</div>` : listEmpty('Todavía no hay retiros', 'Al registrar uno, aparecerá en esta lista.')}`;
 }
 function detailMarkup(item) {
   const guestsHtml = item.guests.length ? `<div class="dialog-section"><span>Acompañantes</span><strong>${item.guests.map(g => `${escapeHtml(g.name)} (${escapeHtml(g.relation)})`).join(', ')}</strong></div>` : '';
@@ -169,8 +165,8 @@ function previewEdit(id) {
 function saveEdit(id) {
   const item = retreats.find(entry => entry.id === id); if (!item) return;
   Object.assign(item, editValues());
-  document.querySelector('#edit-dialog').close(); renderEditList(); renderConsultList(); renderRegisteredPreview(); showToast('Los cambios se aplicaron a este retiro.');
+  document.querySelector('#edit-dialog').close(); renderConsultList(); renderRegisteredPreview(); showToast('Los cambios se aplicaron a este retiro.');
 }
 document.querySelectorAll('.detail-dialog .dialog-close').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
 document.querySelectorAll('.detail-dialog').forEach(dialog => dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); }));
-renderConsultList(); renderEditList(); renderRegisteredPreview();
+renderConsultList(); renderRegisteredPreview();

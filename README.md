@@ -8,7 +8,7 @@ La página estática simula estos casos de uso:
 
 - **Registrar retiro:** nombre, ubicación y fechas son obligatorios; el resto de los datos se puede completar después. Las fechas se ingresan como `dd/mm/yy`.
 - **Consultar retiro:** muestra la agenda y el detalle del retiro, con pagos, estado de participación y elementos necesarios cuando estén registrados.
-- **Modificar retiro:** permite editar los datos de un retiro, revisar un resumen, confirmar los cambios o cancelar y descartarlos.
+- **Modificar retiro:** desde la lista de consulta, cada retiro tiene una acción para editar sus datos, revisar un resumen, confirmar los cambios o cancelar y descartarlos.
 
 La agenda comienza con retiros de ejemplo. Los cambios viven solo en memoria y se pierden al refrescar la página. No hay base de datos ni pagos reales.
 

@@ -14,7 +14,6 @@
       <button class="nav-link active" data-view="inicio">Inicio</button>
       <button class="nav-link" data-view="registrar">Registrar retiro</button>
       <button class="nav-link" data-view="consultar">Consultar retiro</button>
-      <button class="nav-link" data-view="modificar">Modificar retiro</button>
     </nav>
     <div class="profile"><span class="avatar">ML</span><span class="profile-name">Martina López</span></div>
   </header>
@@ -29,7 +28,7 @@
       <div class="action-cards">
         <article class="action-card card-green"><div class="card-icon">＋</div><span class="card-kicker">NUEVA EXPERIENCIA</span><h3>Registrá un retiro<br>en tu agenda.</h3><p>Completá los datos, actividades y contactos para tener toda la información a mano.</p><button data-go="registrar" class="card-link">Registrar retiro <span>↗</span></button><span class="card-decoration">✳</span></article>
         <article class="action-card card-peach"><div class="card-icon">⌕</div><span class="card-kicker">TUS DETALLES</span><h3>Consultá cada<br>experiencia.</h3><p>Revisá fechas, organizador, actividades, pagos y lo que necesitás llevar.</p><button data-go="consultar" class="card-link">Consultar retiros <span>↗</span></button><span class="card-decoration">◌</span></article>
-        <article class="action-card card-lilac"><div class="card-icon">✎</div><span class="card-kicker">TU INFORMACIÓN</span><h3>Mantené todo<br>al día.</h3><p>Modificá los datos de un retiro de tu agenda cuando haga falta.</p><button data-go="modificar" class="card-link">Modificar retiro <span>↗</span></button><span class="card-decoration">☼</span></article>
+        <article class="action-card card-lilac"><div class="card-icon">✎</div><span class="card-kicker">TU INFORMACIÓN</span><h3>Mantené todo<br>al día.</h3><p>Modificá los datos de un retiro de tu agenda cuando haga falta.</p><button data-go="consultar" class="card-link">Elegir retiro para modificar <span>↗</span></button><span class="card-decoration">☼</span></article>
       </div>
       <div class="demo-note"><span>ⓘ</span> Prototipo demostrativo · Los cambios son temporales y desaparecen al refrescar la página.</div>
     </section>
@@ -49,7 +48,6 @@
 
     <section id="consultar" class="view"><div class="page-heading"><div><span class="eyebrow">AGENDA PERSONAL</span><h1>Consultar <em>retiros.</em></h1><p>Seleccioná un retiro para ver toda la información registrada.</p></div><button class="button primary" data-go="registrar">＋ Registrar retiro</button></div><div id="my-retreats" class="retreat-list"></div></section>
 
-    <section id="modificar" class="view"><div class="page-heading"><div><span class="eyebrow">AGENDA PERSONAL</span><h1>Modificar <em>retiro.</em></h1><p>Elegí un retiro de tu agenda y actualizá sus datos.</p></div></div><div id="edit-retreats" class="retreat-list"></div></section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <dialog id="detail-dialog" class="detail-dialog"><button class="dialog-close" aria-label="Cerrar">×</button><div id="dialog-content"></div></dialog>
