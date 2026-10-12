@@ -23,6 +23,13 @@ function isoDate(value) {
 function dateField(value) { if (!value) return ''; const [year, month, day] = value.split('-'); return `${day}/${month}/${year.slice(-2)}`; }
 function dateLabel(value) { if (!value) return '—'; const iso = String(value).includes('/') ? isoDate(value) : value; return iso ? dateField(iso) : '—'; }
 function money(value) { if (value === null || value === '' || value === undefined) return 'Sin costo registrado'; return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(Number(value) || 0); }
+function maskDateInput(field) {
+  const digits = field.value.replace(/\D/g, '').slice(0, 6);
+  field.value = digits.length <= 2 ? (digits.length === 2 ? `${digits}/` : digits)
+    : digits.length < 4 ? `${digits.slice(0, 2)}/${digits.slice(2)}`
+      : digits.length === 4 ? `${digits.slice(0, 2)}/${digits.slice(2)}/`
+        : `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
 function showToast(message) { const toast = document.querySelector('#toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 3000); }
 function go(view) {
   document.querySelectorAll('.view').forEach(el => el.classList.toggle('active-view', el.id === view));
@@ -37,6 +44,8 @@ document.querySelector('#current-date').textContent = new Intl.DateTimeFormat('e
 
 const form = document.querySelector('#retreat-form');
 const errorBox = document.querySelector('#form-error');
+document.querySelectorAll('#retreat-form [name="start"], #retreat-form [name="end"]').forEach(field => { field.dataset.dateMask = 'true'; field.maxLength = 8; });
+document.addEventListener('input', event => { if (event.target.matches('[data-date-mask]')) maskDateInput(event.target); });
 function setStep(step) {
   currentStep = step;
   document.querySelectorAll('.form-step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === step));
@@ -130,7 +139,7 @@ function openEdit(id) {
   editForm.querySelectorAll('[required]').forEach(field => field.removeAttribute('required'));
   ['name', 'location', 'start', 'end'].forEach(name => { editForm.elements[name].required = true; });
   editForm.querySelectorAll('.field > span, .field-title > span').forEach(star => { if (!star.parentElement.querySelector('[required]')) star.remove(); });
-  ['start', 'end'].forEach(name => { const field = editForm.elements[name]; field.type = 'text'; field.inputMode = 'numeric'; field.pattern = '[0-9]{2}/[0-9]{2}/[0-9]{2}'; field.placeholder = 'dd/mm/yy'; field.value = dateField(item[name]); });
+  ['start', 'end'].forEach(name => { const field = editForm.elements[name]; field.type = 'text'; field.inputMode = 'numeric'; field.pattern = '[0-9]{2}/[0-9]{2}/[0-9]{2}'; field.placeholder = 'dd/mm/yy'; field.value = dateField(item[name]); field.dataset.dateMask = 'true'; field.maxLength = 8; });
   document.querySelector('#edit-dialog').showModal();
   document.querySelector('#cancel-edit').addEventListener('click', () => document.querySelector('#edit-dialog').close());
   document.querySelector('#preview-edit').addEventListener('click', () => {
